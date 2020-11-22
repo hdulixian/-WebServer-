@@ -6,7 +6,7 @@
   
 ## Introduction  
 
-声明：本项目cherry-pick自linyacool的WebServer开源项目，https://github.com/linyacool/WebServer/tree/master/WebServer，仅用于学习。
+声明：cherry-pick自linyacool的WebServer开源项目，https://github.com/linyacool/WebServer/tree/master/WebServer，仅用于学习。
 
 本项目为C++11编写的Web服务器，解析了get、head请求，可处理静态资源，支持HTTP长连接，支持管线化请求，并实现了异步日志，记录服务器运行状态。  
 
