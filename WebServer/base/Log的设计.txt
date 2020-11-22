@@ -1,0 +1,11 @@
+
+
+
+
+本项目中日志的设计参考了muduo库的设计，并进行了适度的简化。
+与日志相关的类包括FileUtil、LogFile、AsyncLogging、LogStream、Logging。其中：
+1) FileUtil是最底层的文件类，它使用标准IO封装了Log文件的打开、写入以及关闭功能。
+2) LogFile进一步封装了FileUtil，并设置了一个循环次数，每过这么多次就flush一次。
+3) AsyncLogging是日志库的核心，它负责启动一个log线程，并基于双缓冲技术将log写入LogFile(定时到或被填满时将缓冲区中的数据写入LogFile中)。
+4) LogStream主要用于格式化输出，它重载了<<操作符，同时也有自己的一块缓冲区，这里缓冲区的存在是为了缓存一行，把多个<<的结果连成一块。
+5) Logging是对外接口，Logging类中有一个LogStream对象，主要是为了每次打log时在log的前后加上固定的格式化的信息，如打印log的行、文件名等信息。
