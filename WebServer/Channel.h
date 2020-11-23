@@ -61,16 +61,10 @@ private:
     std::weak_ptr<HttpData> holder_; // 方便找到上层持有该Channel的对象
 
 private:
-    int parse_URI();
-    int parse_Headers();
-    int analysisRequest();
-
     CallBack readHandler_;
     CallBack writeHandler_;
     CallBack errorHandler_;
     CallBack connHandler_;
 };
-
-typedef std::shared_ptr<Channel> SP_Channel;
 
 #endif // _CHANNEL_H_

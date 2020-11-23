@@ -15,7 +15,7 @@ public:
     EventLoop *getLoop() const { return loop_; }
     void start();
     void handNewConn();
-    void handThisConn() { loop_->updatePoller(acceptChannel_); }
+    void handThisConn() { loop_->updatePoller(listenChannel_); }
 
 private:
     EventLoop *loop_;
@@ -23,8 +23,8 @@ private:
     std::unique_ptr<EventLoopThreadPool> eventLoopThreadPool_;
     bool started_;
     int port_;
-    int listenFd_; // listenFd_ 在 acceptChannel_ 之前声明
-    std::shared_ptr<Channel> acceptChannel_;
+    int listenFd_; // listenFd_ 在 listenChannel_ 之前声明
+    std::shared_ptr<Channel> listenChannel_;
     static const int MAXFDS = 100000;
 };
 

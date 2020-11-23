@@ -22,27 +22,27 @@ int createEventfd() {
 
 EventLoop::EventLoop()
         : looping_(false),
-            poller_(new Epoll()),
-            quit_(false),
-            eventHandling_(false),
-            callingPendingFunctors_(false),
-            threadId_(CurrentThread::tid()),
-            wakeupFd_(createEventfd()),
-            pwakeupChannel_(new Channel(this, wakeupFd_)) {
+          quit_(false),
+          eventHandling_(false),
+          callingPendingFunctors_(false),
+          poller_(new Epoll()), /* epoll_create1() */
+          threadId_(CurrentThread::tid()),
+          wakeupFd_(createEventfd()),
+          wakeupChannel_(new Channel(this, wakeupFd_)) {
     if (t_loopInThisThread) {
         LOG << "Exception: Another EventLoop " << t_loopInThisThread << " exists in this thread already...";
     } else {
         t_loopInThisThread = this;
     }
-    pwakeupChannel_->setEvents(EPOLLIN | EPOLLET);
-    pwakeupChannel_->setConnHandler(bind(&EventLoop::handleConn, this));  // ??
-    pwakeupChannel_->setReadHandler(bind(&EventLoop::handleRead, this));
-    poller_->epoll_add(pwakeupChannel_, 0);
+    wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
+    wakeupChannel_->setReadHandler(bind(&EventLoop::handleRead, this));
+    poller_->epoll_add(wakeupChannel_, 0);  /* epoll_ctl() */
+    // addToPoller(wakeupChannel_, 0);  /* epoll_ctl() */
 }
 
 EventLoop::~EventLoop() {
-    wakeupChannel_->disableAll();
-    wakeupChannel_->remove();
+    // wakeupChannel_->disableAll();
+    // wakeupChannel_->remove();
     close(wakeupFd_);
     t_loopInThisThread = NULL;
 }
@@ -56,7 +56,7 @@ void EventLoop::wakeup() {
 }
 
 void EventLoop::handleConn() {
-    updatePoller(pwakeupChannel_, 0);
+    updatePoller(wakeupChannel_, 0);
 }
 
 void EventLoop::handleRead() {
@@ -65,7 +65,7 @@ void EventLoop::handleRead() {
     if (n != sizeof one) {
         LOG << "EventLoop::handleRead() reads " << n << " bytes instead of 8";
     }
-    pwakeupChannel_->setEvents(EPOLLIN | EPOLLET);
+    wakeupChannel_->setEvents(EPOLLIN | EPOLLET);  // ??
 }
 
 void EventLoop::runInLoop(Functor &&cb) {
@@ -91,10 +91,10 @@ void EventLoop::loop() {
     quit_ = false;
     LOG << "EventLoop " << this " in thread " << (int)threadId_ << " start looping...";
 
-    std::vector<SP_Channel> activeChannelList;
+    std::vector<std::shared_ptr<Channel>> activeChannelList;
     while (!quit_) {
         activeChannelList.clear();
-        activeChannelList = poller_->poll();
+        activeChannelList = poller_->poll();  /* epoll_wait() */
         eventHandling_ = true;
         // mainReactor中只有一个wakeupChannel_和一个acceptChannel_，subReactor中则有一个wakeupChannel_和多个connChannel_
         // 对应的，mainReactor只负责监听wakeupFd_和listenFd_，而subReactor则负责监听wakeupFd_以及客户端与多个connFd_之间的通信

@@ -12,18 +12,18 @@
 
 class EventLoopThreadPool : noncopyable {
  public:
-    EventLoopThreadPool(EventLoop* baseLoop, int numThreads);
+    EventLoopThreadPool(EventLoop* mainLoop, int numThreads);
     ~EventLoopThreadPool() { LOG << "~EventLoopThreadPool()"; }
     void start();
     EventLoop *getNextLoop();
 
  private:
-    EventLoop *baseLoop_;
+    EventLoop *mainLoop_;
     bool started_;
     int numThreads_;
     int next_;
-    std::vector<std::shared_ptr<EventLoopThread>> threads_;
-    std::vector<EventLoop*> loops_;
+    std::vector<std::shared_ptr<EventLoopThread>> ioLoopThreads_;
+    std::vector<EventLoop*> ioLoops_;
 };
 
 #endif // _EVENTLOOP_THREADPOOL_H_

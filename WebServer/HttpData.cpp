@@ -612,5 +612,5 @@ void HttpData::handleClose() {
 
 void HttpData::newEvent() {
     channel_->setEvents(DEFAULT_EVENT);
-    loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);
+    loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);  /* epoll_ctl() */
 }

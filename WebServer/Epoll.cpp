@@ -25,6 +25,7 @@ typedef shared_ptr<Channel> SP_Channel;
 Epoll::Epoll() : epollFd_(epoll_create1(EPOLL_CLOEXEC)), events_(EVENTSNUM) {
     assert(epollFd_ > 0);
 }
+
 Epoll::~Epoll() {}
 
 // 注册新描述符
@@ -77,7 +78,7 @@ void Epoll::epoll_del(SP_Channel request) {
     fd2http_[fd].reset();
 }
 
-// 返回活跃事件数
+// 返回活跃事件对应的channel列表
 std::vector<SP_Channel> Epoll::poll() {
     while (true) {
         int event_count = epoll_wait(epollFd_, &*events_.begin(), events_.size(), EPOLLWAIT_TIME);
@@ -100,7 +101,7 @@ std::vector<SP_Channel> Epoll::getEventsRequest(int events_num) {
         SP_Channel cur_req = fd2chan_[fd];
         if (cur_req) {
             cur_req->setRevents(events_[i].events);
-            cur_req->setEvents(0);  // ??
+            cur_req->setEvents(0);  // ?? 为什么要把 events 置空
             // 加入线程池之前将Timer和request分离
             // cur_req->seperateTimer();
             req_data.push_back(cur_req);

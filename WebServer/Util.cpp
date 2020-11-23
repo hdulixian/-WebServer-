@@ -144,7 +144,7 @@ ssize_t writen(int fd, std::string &sbuff) {
     return writeSum;
 }
 
-void handle_for_sigpipe() {
+void handleSigpipe() {
     struct sigaction sa;
     memset(&sa, '\0', sizeof(sa));
     sa.sa_handler = SIG_IGN;
