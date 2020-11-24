@@ -10,10 +10,8 @@
 #include "Util.h"
 #include "time.h"
 
-using namespace std;
-
 pthread_once_t MimeType::once_control = PTHREAD_ONCE_INIT;
-std::unordered_map<std::string, std::string> MimeType::mime;
+std::unordered_map<string, string> MimeType::mime;
 
 const __uint32_t DEFAULT_EVENT = EPOLLIN | EPOLLET | EPOLLONESHOT;
 const int DEFAULT_EXPIRED_TIME = 2000;                // ms
@@ -101,30 +99,31 @@ void MimeType::init() {
     mime["default"] = "text/html";
 }
 
-std::string MimeType::getMime(const std::string &suffix) {
+string MimeType::getMime(const string &suffix) {
     pthread_once(&once_control, MimeType::init);
-    if (mime.find(suffix) == mime.end())
+    if (mime.find(suffix) == mime.end()) {
         return mime["default"];
-    else
+    } else {
         return mime[suffix];
+    }
 }
 
 HttpData::HttpData(EventLoop *loop, int connfd)
         : loop_(loop),
-            fd_(connfd),
-            channel_(new Channel(loop, fd_)),
-            error_(false),
-            connectionState_(H_CONNECTED),
-            method_(METHOD_GET),
-            HTTPVersion_(HTTP_11),
-            nowReadPos_(0),
-            state_(STATE_PARSE_URI),
-            hState_(H_START),
-            keepAlive_(false) {
-    // loop_->queueInLoop(bind(&HttpData::setHandlers, this));
-    channel_->setReadHandler(bind(&HttpData::handleRead, this));
-    channel_->setWriteHandler(bind(&HttpData::handleWrite, this));
-    channel_->setConnHandler(bind(&HttpData::handleConn, this));
+          fd_(connfd),
+          connChannel_(new Channel(loop, fd_)),
+          error_(false),
+          connectionState_(H_CONNECTED),
+          method_(METHOD_GET),
+          HTTPVersion_(HTTP_11),
+          nowReadPos_(0),
+          state_(STATE_PARSE_URI),
+          hState_(H_START),
+          keepAlive_(false) {
+    // loop_->queueInLoop(std::bind(&HttpData::setHandlers, this));
+    connChannel_->setReadHandler(std::bind(&HttpData::handleRead, this));
+    connChannel_->setWriteHandler(std::bind(&HttpData::handleWrite, this));
+    connChannel_->setConnHandler(std::bind(&HttpData::handleConn, this));
 }
 
 void HttpData::reset() {
@@ -137,23 +136,23 @@ void HttpData::reset() {
     headers_.clear();
     // keepAlive_ = false;
     if (timer_.lock()) {
-        shared_ptr<TimerNode> my_timer(timer_.lock());
+        std::shared_ptr<TimerNode> my_timer(timer_.lock());
         my_timer->clearReq();
         timer_.reset();
     }
 }
 
 void HttpData::seperateTimer() {
-    // cout << "seperateTimer" << endl;
+    // std::cout << "seperateTimer" << std::endl;
     if (timer_.lock()) {
-        shared_ptr<TimerNode> my_timer(timer_.lock());
+        std::shared_ptr<TimerNode> my_timer(timer_.lock());
         my_timer->clearReq();
         timer_.reset();
     }
 }
 
 void HttpData::handleRead() {
-    __uint32_t &events_ = channel_->getEvents();
+    __uint32_t &events_ = connChannel_->getEvents();
     do {
         bool zero = false;
         int read_num = readn(fd_, inBuffer_, zero);
@@ -162,7 +161,7 @@ void HttpData::handleRead() {
             inBuffer_.clear();
             break;
         }
-        // cout << inBuffer_ << endl;
+        // std::cout << inBuffer_ << std::endl;
         if (read_num < 0) {
             perror("1");
             error_ = true;
@@ -184,7 +183,7 @@ void HttpData::handleRead() {
                 // error_ = true;
                 break;
             }
-            // cout << "readnum == 0" << endl;
+            // std::cout << "readnum == 0" << std::endl;
         }
 
         if (state_ == STATE_PARSE_URI) {
@@ -223,7 +222,7 @@ void HttpData::handleRead() {
             if (headers_.find("Content-length") != headers_.end()) {
                 content_length = stoi(headers_["Content-length"]);
             } else {
-                // cout << "(state_ == STATE_RECV_BODY)" << endl;
+                // std::cout << "(state_ == STATE_RECV_BODY)" << std::endl;
                 error_ = true;
                 handleError(fd_, 400, "Bad Request: Lack of argument (Content-length)");
                 break;
@@ -237,13 +236,13 @@ void HttpData::handleRead() {
                 state_ = STATE_FINISH;
                 break;
             } else {
-                // cout << "state_ == STATE_ANALYSIS" << endl;
+                // std::cout << "state_ == STATE_ANALYSIS" << std::endl;
                 error_ = true;
                 break;
             }
         }
     } while (false);
-    // cout << "state_=" << state_ << endl;
+    // std::cout << "state_=" << state_ << std::endl;
     if (!error_) {
         if (outBuffer_.size() > 0) {
             handleWrite();
@@ -269,7 +268,7 @@ void HttpData::handleRead() {
 
 void HttpData::handleWrite() {
     if (!error_ && connectionState_ != H_DISCONNECTED) {
-        __uint32_t &events_ = channel_->getEvents();
+        __uint32_t &events_ = connChannel_->getEvents();
         if (writen(fd_, outBuffer_) < 0) {
             perror("writen");
             events_ = 0;
@@ -281,7 +280,7 @@ void HttpData::handleWrite() {
 
 void HttpData::handleConn() {
     seperateTimer();
-    __uint32_t &events_ = channel_->getEvents();
+    __uint32_t &events_ = connChannel_->getEvents();
     if (!error_ && connectionState_ == H_CONNECTED) {
         if (events_ != 0) {
             int timeout = DEFAULT_EXPIRED_TIME;
@@ -292,28 +291,28 @@ void HttpData::handleConn() {
             }
             // events_ |= (EPOLLET | EPOLLONESHOT);
             events_ |= EPOLLET;
-            loop_->updatePoller(channel_, timeout);
+            loop_->updatePoller(connChannel_, timeout);
 
         } else if (keepAlive_) {
             events_ |= (EPOLLIN | EPOLLET);
             // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
             int timeout = DEFAULT_KEEP_ALIVE_TIME;
-            loop_->updatePoller(channel_, timeout);
+            loop_->updatePoller(connChannel_, timeout);
         } else {
-            // cout << "close normally" << endl;
-            // loop_->shutdown(channel_);
-            // loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
+            // std::cout << "close normally" << std::endl;
+            // loop_->shutdown(connChannel_);
+            // loop_->runInLoop(std::bind(&HttpData::handleClose, shared_from_this()));
             events_ |= (EPOLLIN | EPOLLET);
             // events_ |= (EPOLLIN | EPOLLET | EPOLLONESHOT);
             int timeout = (DEFAULT_KEEP_ALIVE_TIME >> 1);
-            loop_->updatePoller(channel_, timeout);
+            loop_->updatePoller(connChannel_, timeout);
         }
     } else if (!error_ && connectionState_ == H_DISCONNECTING &&
                          (events_ & EPOLLOUT)) {
         events_ = (EPOLLOUT | EPOLLET);
     } else {
-        // cout << "close with errors" << endl;
-        loop_->runInLoop(bind(&HttpData::handleClose, shared_from_this()));
+        // std::cout << "close with errors" << std::endl;
+        loop_->runInLoop(std::bind(&HttpData::handleClose, shared_from_this()));
     }
 }
 
@@ -373,7 +372,7 @@ URIState HttpData::parseURI() {
         }
         pos = _pos;
     }
-    // cout << "fileName_: " << fileName_ << endl;
+    // std::cout << "fileName_: " << fileName_ << std::endl;
     // HTTP 版本号
     pos = request_line.find("/", pos);
     if (pos < 0)
@@ -497,11 +496,11 @@ AnalysisState HttpData::analysisRequest() {
         //         timeout=" + to_string(DEFAULT_KEEP_ALIVE_TIME) + "\r\n";
         // }
         // int length = stoi(headers_["Content-length"]);
-        // vector<char> data(inBuffer_.begin(), inBuffer_.begin() + length);
+        // std::vector<char> data(inBuffer_.begin(), inBuffer_.begin() + length);
         // Mat src = imdecode(data, CV_LOAD_IMAGE_ANYDEPTH|CV_LOAD_IMAGE_ANYCOLOR);
         // //imwrite("receive.bmp", src);
         // Mat res = stitch(src);
-        // vector<uchar> data_encode;
+        // std::vector<uchar> data_encode;
         // imencode(".png", res, data_encode);
         // header += string("Content-length: ") + to_string(data_encode.size()) +
         // "\r\n\r\n";
@@ -581,7 +580,7 @@ AnalysisState HttpData::analysisRequest() {
     return ANALYSIS_ERROR;
 }
 
-void HttpData::handleError(int fd, int err_num, std::string short_msg) {
+void HttpData::handleError(int fd, int err_num, string short_msg) {
     short_msg = " " + short_msg;
     char send_buff[4096];
     string body_buff, header_buff;
@@ -606,11 +605,11 @@ void HttpData::handleError(int fd, int err_num, std::string short_msg) {
 
 void HttpData::handleClose() {
     connectionState_ = H_DISCONNECTED;
-    shared_ptr<HttpData> guard(shared_from_this());
-    loop_->removeFromPoller(channel_);
+    std::shared_ptr<HttpData> guard(shared_from_this());
+    loop_->removeFromPoller(connChannel_);
 }
 
 void HttpData::newEvent() {
-    channel_->setEvents(DEFAULT_EVENT);
-    loop_->addToPoller(channel_, DEFAULT_EXPIRED_TIME);  /* epoll_ctl() */
+    connChannel_->setEvents(DEFAULT_EVENT);
+    loop_->addToPoller(connChannel_, DEFAULT_EXPIRED_TIME);  /* epoll_ctl() */
 }

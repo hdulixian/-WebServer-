@@ -16,7 +16,7 @@
 
 class AsyncLogging : noncopyable {
 public:
-    AsyncLogging(const std::string basename, int flushInterval = 2);
+    AsyncLogging(const string basename, int flushInterval = 2);
     ~AsyncLogging() {
         if (running_) stop();
     }
@@ -41,7 +41,7 @@ private:
     typedef std::shared_ptr<Buffer> BufferPtr;
     const int flushInterval_;
     bool running_;
-    std::string basename_;
+    string basename_;
     Thread thread_;
     MutexLock mutex_;
     Condition cond_;

@@ -26,10 +26,10 @@ Server::Server(EventLoop *loop, int threadNum, int port)
 
 void Server::start() {
     eventLoopThreadPool_->start();
-    // ioLoop起来后添加对listenFd_的监听,否则在ioLoop起来之前所有已连接套接字上的IO事件都将在mainLoop上处理,
-    // 违背了mainLoop只监听连接事件, ioLoop监听已连接套接字上的IO事件的原则。
+    // ioLoop起来后添加对listenFd_的监听, 否则在ioLoop起来之前所有已连接套接字上的IO事件都将在mainLoop上处理,
+    // 这违背了mainLoop只监听连接事件, ioLoop监听已连接套接字上的IO事件的原则。
     listenChannel_->setEvents(EPOLLIN | EPOLLET);
-    listenChannel_->setReadHandler(bind(&Server::handNewConn, this));
+    listenChannel_->setReadHandler(std::bind(&Server::handNewConn, this));
     loop_->addToPoller(listenChannel_, 0);  /* epoll_ctl() */
     started_ = true;
 }
@@ -55,10 +55,10 @@ void Server::handNewConn() {
         }
         setSocketNodelay(connfd);
 
-        shared_ptr<HttpData> req_info(new HttpData(loop, connfd));
+        std::shared_ptr<HttpData> req_info(new HttpData(loop, connfd));
         req_info->getChannel()->setHolder(req_info);
         loop->queueInLoop(std::bind(&HttpData::newEvent, req_info));
     }
     
-    listenChannel_->setEvents(EPOLLIN | EPOLLET); // 对应 getEventsRequest 将 events 置空
+    // listenChannel_->setEvents(EPOLLIN | EPOLLET); // 对应 getEventsRequest 将 events 置空
 }

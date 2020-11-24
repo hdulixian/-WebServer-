@@ -21,7 +21,7 @@ class EventLoopThread : noncopyable {
     EventLoop *loop_;
     bool exiting_;
     Thread thread_;
-    MutexLock mutex_;
+    MutexLock mutex_;  // 守护 loop_
     Condition cond_;
 };
 

@@ -7,8 +7,6 @@
 #include "Util.h"
 #include "base/Logging.h"
 
-// using namespace std;
-
 __thread EventLoop *t_loopInThisThread = 0;
 
 int createEventfd() {
@@ -35,7 +33,7 @@ EventLoop::EventLoop()
         t_loopInThisThread = this;
     }
     wakeupChannel_->setEvents(EPOLLIN | EPOLLET);
-    wakeupChannel_->setReadHandler(bind(&EventLoop::handleRead, this));
+    wakeupChannel_->setReadHandler(std::bind(&EventLoop::handleRead, this));
     poller_->epoll_add(wakeupChannel_, 0);  /* epoll_ctl() */
     // addToPoller(wakeupChannel_, 0);  /* epoll_ctl() */
 }
@@ -96,11 +94,11 @@ void EventLoop::loop() {
         activeChannelList.clear();
         activeChannelList = poller_->poll();  /* epoll_wait() */
         eventHandling_ = true;
-        // mainReactor中只有一个wakeupChannel_和一个acceptChannel_，subReactor中则有一个wakeupChannel_和多个connChannel_
-        // 对应的，mainReactor只负责监听wakeupFd_和listenFd_，而subReactor则负责监听wakeupFd_以及客户端与多个connFd_之间的通信
+        // mainLoop中只有一个wakeupChannel_和一个acceptChannel_，ioLoop中则有一个wakeupChannel_和多个connChannel_
+        // 对应的，mainLoop只负责监听wakeupFd_和listenFd_，而ioLoop则负责监听wakeupFd_以及客户端与多个connFd_之间的通信
         for (auto &activeChannel : activeChannelList) activeChannel->handleEvents(); 
         eventHandling_ = false;
-        doPendingFunctors(); // subReactor对应的pendingFunctors为HttpData::newEvent，它会把connFd_加入epoll监听队列
+        doPendingFunctors(); // ioLoop对应的pendingFunctors为HttpData::newEvent，它会把connFd_加入epoll监听队列
         poller_->handleExpired();
     }
     looping_ = false;
@@ -113,7 +111,8 @@ void EventLoop::doPendingFunctors() {
         MutexLockGuard lock(mutex_);
         functors.swap(pendingFunctors_);
     }
-    for (size_t i = 0; i < functors.size(); ++i) functors[i]();
+    // for (size_t i = 0; i < functors.size(); ++i) functors[i]();
+    for (auto &functor : functors) functor();
     callingPendingFunctors_ = false;
 }
 

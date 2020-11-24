@@ -4,7 +4,6 @@
 #define _LOG_STREAM_H_
 
 #include <assert.h>
-#include <string.h>
 #include <string>
 #include "noncopyable.h"
 
@@ -87,7 +86,7 @@ public:
         return operator<<(reinterpret_cast<const char*>(str));
     }
 
-    LogStream& operator<<(const std::string& v) {
+    LogStream& operator<<(const string& v) {
         buffer_.append(v.c_str(), v.size());
         return *this;
     }

@@ -5,7 +5,6 @@
 
 #include <pthread.h>
 #include <stdio.h>
-#include <string.h>
 #include <string>
 #include "LogStream.h"
 
@@ -17,8 +16,8 @@ public:
     ~Logger();
     LogStream &stream() { return impl_.stream_; }
 
-    static void setLogFileName(std::string fileName) { logFileName_ = fileName; }
-    static std::string getLogFileName() { return logFileName_; }
+    static void setLogFileName(string fileName) { logFileName_ = fileName; }
+    static string getLogFileName() { return logFileName_; }
 
 private:
     class Impl {
@@ -28,11 +27,11 @@ private:
 
         LogStream stream_;
         int line_;
-        std::string basename_;
+        string basename_;
     };
     
     Impl impl_;
-    static std::string logFileName_;
+    static string logFileName_;
 };
 
 #define LOG Logger(__FILE__, __LINE__).stream()

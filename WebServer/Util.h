@@ -7,10 +7,10 @@
 #include <string>
 
 ssize_t readn(int fd, void *buff, size_t n);
-ssize_t readn(int fd, std::string &inBuffer, bool &zero);
-ssize_t readn(int fd, std::string &inBuffer);
+ssize_t readn(int fd, string &inBuffer, bool &zero);
+ssize_t readn(int fd, string &inBuffer);
 ssize_t writen(int fd, void *buff, size_t n);
-ssize_t writen(int fd, std::string &sbuff);
+ssize_t writen(int fd, string &sbuff);
 void handleSigpipe();
 int setSocketNonBlocking(int fd);
 void setSocketNodelay(int fd);

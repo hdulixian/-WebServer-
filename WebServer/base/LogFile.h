@@ -14,7 +14,7 @@
 class LogFile : noncopyable {
  public:
     // 每被append N次就flush一下，会往文件写，只不过，文件也是带缓冲区的
-    LogFile(const std::string& basename, int flushEveryN = 1024);
+    LogFile(const string& basename, int flushEveryN = 1024);
     ~LogFile();
 
     void append(const char *logline, int len);
@@ -24,7 +24,7 @@ class LogFile : noncopyable {
  private:
     void append_unlocked(const char *logline, int len);
 
-    const std::string basename_;
+    const string basename_;
     const int flushEveryN_;
 
     int count_;

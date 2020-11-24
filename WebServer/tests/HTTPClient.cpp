@@ -14,8 +14,6 @@
 #include <iostream>
 
 
-using namespace std;
-
 #define MAXSIZE 1024
 #define IPADDRESS "127.0.0.1"
 #define SERV_PORT 8888
@@ -54,12 +52,12 @@ int main(int argc, char *argv[]) {
     const char *p = " ";
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setSocketNonBlocking1(sockfd);
-        cout << "1:" << endl;
+        std::cout << "1:" << std::endl;
         ssize_t n = write(sockfd, p, strlen(p));
-        cout << "strlen(p) = " << strlen(p) << endl;
+        std::cout << "strlen(p) = " << strlen(p) << std::endl;
         sleep(1);
         n = read(sockfd, buff, 4096);
-        cout << "n=" << n << endl;
+        std::cout << "n=" << n << std::endl;
         printf("%s", buff);
         close(sockfd);
     } else {
@@ -72,12 +70,12 @@ int main(int argc, char *argv[]) {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setSocketNonBlocking1(sockfd);
-        cout << "2:" << endl;
+        std::cout << "2:" << std::endl;
         ssize_t n = write(sockfd, p, strlen(p));
-        cout << "strlen(p) = " << strlen(p) << endl;
+        std::cout << "strlen(p) = " << strlen(p) << std::endl;
         sleep(1);
         n = read(sockfd, buff, 4096);
-        cout << "n=" << n << endl;
+        std::cout << "n=" << n << std::endl;
         printf("%s", buff);
         close(sockfd);
     } else {
@@ -95,12 +93,12 @@ int main(int argc, char *argv[]) {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == 0) {
         setSocketNonBlocking1(sockfd);
-        cout << "3:" << endl;
+        std::cout << "3:" << std::endl;
         ssize_t n = write(sockfd, p, strlen(p));
-        cout << "strlen(p) = " << strlen(p) << endl;
+        std::cout << "strlen(p) = " << strlen(p) << std::endl;
         sleep(1);
         n = read(sockfd, buff, 4096);
-        cout << "n=" << n << endl;
+        std::cout << "n=" << n << std::endl;
         printf("%s", buff);
         close(sockfd);
     } else {

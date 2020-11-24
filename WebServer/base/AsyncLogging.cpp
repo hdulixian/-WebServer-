@@ -7,7 +7,7 @@
 #include <functional>
 #include "LogFile.h"
 
-AsyncLogging::AsyncLogging(std::string logFileName_, int flushInterval)
+AsyncLogging::AsyncLogging(string logFileName_, int flushInterval)
         : flushInterval_(flushInterval),
           running_(false),
           basename_(logFileName_),

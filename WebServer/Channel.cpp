@@ -11,8 +11,6 @@
 #include "EventLoop.h"
 #include "Util.h"
 
-using namespace std;
-
 Channel::Channel(EventLoop *loop)
     : loop_(loop), fd_(0), events_(0), lastEvents_(0) {}
 

@@ -7,7 +7,6 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-using namespace std;
 
 void threadFunc()
 {
@@ -20,7 +19,7 @@ void threadFunc()
 void type_test()
 {
     // 13 lines
-    cout << "----------type test-----------" << endl;
+    std::cout << "----------type test-----------" << std::endl;
     LOG << 0;
     LOG << 1234567890123;
     LOG << 1.0f;
@@ -39,7 +38,7 @@ void type_test()
 void stressing_single_thread()
 {
     // 100000 lines
-    cout << "----------stressing test single thread-----------" << endl;
+    std::cout << "----------stressing test single thread-----------" << std::endl;
     for (int i = 0; i < 100000; ++i)
     {
         LOG << i;
@@ -49,11 +48,11 @@ void stressing_single_thread()
 void stressing_multi_threads(int threadNum = 4)
 {
     // threadNum * 100000 lines
-    cout << "----------stressing test multi thread-----------" << endl;
-    vector<shared_ptr<Thread>> vsp;
+    std::cout << "----------stressing test multi thread-----------" << std::endl;
+    std::vector<std::shared_ptr<Thread>> vsp;
     for (int i = 0; i < threadNum; ++i)
     {
-        shared_ptr<Thread> tmp(new Thread(threadFunc, "testFunc"));
+        std::shared_ptr<Thread> tmp(new Thread(threadFunc, "testFunc"));
         vsp.push_back(tmp);
     }
     for (int i = 0; i < threadNum; ++i)
@@ -66,7 +65,7 @@ void stressing_multi_threads(int threadNum = 4)
 void other()
 {
     // 1 line
-    cout << "----------other test-----------" << endl;
+    std::cout << "----------other test-----------" << std::endl;
     LOG << "fddsa" << 'c' << 0 << 3.666 << string("This is a string");
 }
 

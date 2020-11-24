@@ -12,9 +12,7 @@
 #include <memory>
 #include "CurrentThread.h"
 
-
 #include <iostream>
-using namespace std;
 
 namespace CurrentThread {
 __thread int t_cachedTid = 0;

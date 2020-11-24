@@ -6,7 +6,7 @@
 EventLoopThread::EventLoopThread()
     : loop_(NULL),
         exiting_(false),
-        thread_(bind(&EventLoopThread::threadFunc, this), "EventLoopThread"),
+        thread_(std::bind(&EventLoopThread::threadFunc, this), "EventLoopThread"),
         mutex_(),
         cond_(mutex_)
 {}
@@ -24,7 +24,7 @@ EventLoop *EventLoopThread::startLoop() {
     thread_.start();
     {
         MutexLockGuard lock(mutex_);
-        while (loop_ == NULL) cond_.wait(); // 一直等到子线程中 loop_ 初始化完成，随后主线程继续执行，子线程则进入事件循环
+        while (loop_ == NULL) cond_.wait(); // 一直等到IO线程中 loop_ 初始化完成，随后主线程继续执行，IO线程则进入事件循环
     }
     return loop_;
 }

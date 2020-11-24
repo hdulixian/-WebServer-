@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
     int threadNum = 4;
     int port = 8080;
-    std::string logPath = "./WebServer.log";
+    string logPath = "./WebServer.log";
 
     /*
     * #include <unistd.h>

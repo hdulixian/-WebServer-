@@ -64,5 +64,7 @@
         "vector": "cpp",
         "*.tcc": "cpp",
         "hashtable": "cpp"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.dimInactiveRegions": false
 }

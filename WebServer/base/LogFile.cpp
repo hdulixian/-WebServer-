@@ -6,7 +6,6 @@
 #include <time.h>
 #include "FileUtil.h"
 
-using namespace std;
 
 LogFile::LogFile(const string &basename, int flushEveryN)
     : basename_(basename),

@@ -6,7 +6,6 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <signal.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -35,7 +34,7 @@ ssize_t readn(int fd, void *buff, size_t n) {
     return readSum;
 }
 
-ssize_t readn(int fd, std::string &inBuffer, bool &zero) {
+ssize_t readn(int fd, string &inBuffer, bool &zero) {
     ssize_t nread = 0;
     ssize_t readSum = 0;
     while (true) {
@@ -58,13 +57,13 @@ ssize_t readn(int fd, std::string &inBuffer, bool &zero) {
         // printf("nread = %d\n", nread);
         readSum += nread;
         // buff += nread;
-        inBuffer += std::string(buff, buff + nread);
+        inBuffer += string(buff, buff + nread);
         // printf("after inBuffer.size() = %d\n", inBuffer.size());
     }
     return readSum;
 }
 
-ssize_t readn(int fd, std::string &inBuffer) {
+ssize_t readn(int fd, string &inBuffer) {
     ssize_t nread = 0;
     ssize_t readSum = 0;
     while (true) {
@@ -86,7 +85,7 @@ ssize_t readn(int fd, std::string &inBuffer) {
         // printf("nread = %d\n", nread);
         readSum += nread;
         // buff += nread;
-        inBuffer += std::string(buff, buff + nread);
+        inBuffer += string(buff, buff + nread);
         // printf("after inBuffer.size() = %d\n", inBuffer.size());
     }
     return readSum;
@@ -116,7 +115,7 @@ ssize_t writen(int fd, void *buff, size_t n) {
     return writeSum;
 }
 
-ssize_t writen(int fd, std::string &sbuff) {
+ssize_t writen(int fd, string &sbuff) {
     size_t nleft = sbuff.size();
     ssize_t nwritten = 0;
     ssize_t writeSum = 0;
